@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "446292412773",
+    "firebase_url": "https://task-checker-bc2dd.firebaseio.com",
+    "project_id": "task-checker-bc2dd",
+    "storage_bucket": "task-checker-bc2dd.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:446292412773:android:80dd2727ef36213f",
+        "android_client_info": {
+          "package_name": "com.example.zen.taskchecker"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "446292412773-2kvk68h20cr8bgpvpoqai0argssao1h0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBYqFfcZ5F8F3mYk6-nUFsFb6HVKGlfgJA"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
