@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 if (TextUtils.isEmpty(mPass))
                 {
-                    email.setError("Required Field");
+                    pass.setError("Required Field");
                     return;
                 }
                 mDialog.setMessage("Process..");

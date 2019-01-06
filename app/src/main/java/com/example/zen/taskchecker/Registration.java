@@ -65,7 +65,7 @@ public class Registration extends AppCompatActivity
                 }
                 if (TextUtils.isEmpty(mPass))
                 {
-                    email.setError("Required Field");
+                    pass.setError("Required Field");
                     return;
                 }
 
