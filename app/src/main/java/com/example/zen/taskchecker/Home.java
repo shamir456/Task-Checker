@@ -1,18 +1,19 @@
 package com.example.zen.taskchecker;
 
+import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.view.menu.MenuView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.view.*;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -36,7 +37,20 @@ public class Home extends AppCompatActivity {
     private FloatingActionButton btn;
     private RecyclerView recyclerView;
 
+    //update fields
+    private EditText titleup;
+    private EditText noteup;
+    private  Button btnDel;
+    private Button btnUp;
+
+    //Firebase
     private  FirebaseRecyclerAdapter adapter;
+
+    //Variables
+    private String title;
+    private String post_key;
+    private String note;
+    private View view;
 
     private FirebaseAuth mAuth;
     private DatabaseReference database=FirebaseDatabase.getInstance().getReference();
@@ -126,7 +140,7 @@ public class Home extends AppCompatActivity {
         String uid=mAuth.getUid();
 
 
-        String id="-LVY0xw940tIQVv6_zG2";
+
         Query query = FirebaseDatabase.getInstance()
                 .getReference().child("TaskNote").child(uid).orderByChild("id");
         final FirebaseRecyclerOptions<Data> options = new FirebaseRecyclerOptions.Builder<Data>().
@@ -135,10 +149,21 @@ public class Home extends AppCompatActivity {
 
         adapter= new FirebaseRecyclerAdapter<Data, ViewHolder>(options) {
             @Override
-            protected void onBindViewHolder(@NonNull ViewHolder holder, int position, @NonNull Data model) {
+            protected void onBindViewHolder(@NonNull ViewHolder holder, final int position, @NonNull final Data model) {
                 holder.setTitle(model.getTitle());
                 holder.setNote(model.getNote());
                 holder.setDate(model.getDate());
+                holder.myView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                        post_key=getRef(position).getKey();
+                        title=model.getTitle();
+                        note=model.getNote();
+
+                        UpdateData();
+                    }
+                });
 
 
             }
@@ -146,15 +171,66 @@ public class Home extends AppCompatActivity {
             @NonNull
             @Override
             public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
-                View view = LayoutInflater.from(viewGroup.getContext())
+                 view = LayoutInflater.from(viewGroup.getContext())
                         .inflate(R.layout.item, viewGroup, false);
                 return new  ViewHolder(view);
             }
         };
 
+
           recyclerView.setAdapter(adapter);
 
 
+    }
+
+
+    public void UpdateData()
+    {
+        final AlertDialog.Builder dialog=new AlertDialog.Builder(Home.this);
+        LayoutInflater inflater=LayoutInflater.from(Home.this);
+
+        View view=inflater.inflate(R.layout.update,null);
+        dialog.setView(view);
+        final AlertDialog alertDialog=dialog.create();
+
+
+        titleup=view.findViewById(R.id.title_update);
+        noteup=view.findViewById(R.id.note_update);
+        btnDel=view.findViewById(R.id.btn_delete);
+        btnUp=view.findViewById(R.id.btn_update);
+
+ // titleup.setText(title);
+        titleup.setText(title.toString());
+        titleup.setSelection(title.length());
+        noteup.setText(note.toString());
+        noteup.setSelection(note.length());
+
+        btnUp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                title=titleup.getText().toString().trim();
+                note=noteup.getText().toString().trim();
+
+                String mDate=DateFormat.getDateInstance().format(new Date());
+
+                Data data=new Data(note,mDate, title, post_key);
+                database.child(post_key).setValue(data);
+
+                alertDialog.dismiss();
+            }
+        });
+        btnDel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                database.child(post_key).removeValue();
+
+
+                alertDialog.dismiss();
+            }
+        });
+
+        alertDialog.show();
     }
 
     @Override
@@ -164,6 +240,32 @@ public class Home extends AppCompatActivity {
         adapter.startListening();
     }
 
+    @SuppressLint("ResourceType")
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu, menu);
+
+        return true;
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+
+        switch (item.getItemId())
+        {
+            case R.id.logout:
+                // Single menu item is selected do something
+                // Ex: launching new activity/screen or show alert message
+                Toast.makeText(Home.this, "Loging out..", Toast.LENGTH_SHORT).show();
+                mAuth.signOut();
+                startActivity(new Intent(Home.this,MainActivity.class));
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
 
     public static class ViewHolder extends RecyclerView.ViewHolder{
 
