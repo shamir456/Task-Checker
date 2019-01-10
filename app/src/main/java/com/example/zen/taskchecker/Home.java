@@ -160,8 +160,9 @@ public class Home extends AppCompatActivity {
                         post_key=getRef(position).getKey();
                         title=model.getTitle();
                         note=model.getNote();
-
+                     // Add status condition
                         UpdateData();
+                        //Add a function for completed task only to show 
                     }
                 });
 
