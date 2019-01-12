@@ -14,10 +14,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.*;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.*;
 import com.example.zen.taskchecker.Modal.Data;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
@@ -43,6 +40,10 @@ public class Home extends AppCompatActivity {
     private  Button btnDel;
     private Button btnUp;
 
+    private Button complete;
+    private Button close;
+
+
     //Firebase
     private  FirebaseRecyclerAdapter adapter;
 
@@ -51,6 +52,8 @@ public class Home extends AppCompatActivity {
     private String post_key;
     private String note;
     private View view;
+
+    private String date;
 
     private FirebaseAuth mAuth;
     private DatabaseReference database=FirebaseDatabase.getInstance().getReference();
@@ -111,8 +114,9 @@ public class Home extends AppCompatActivity {
                         }
                         String id=database.push().getKey();
                         String date= DateFormat.getDateInstance().format(new Date());
+                        int status=0;
 
-                        Data data=new Data(mNote,date, mTitle, id);
+                        Data data=new Data(mNote,date, mTitle, id,status);
 
 
                         database.child(id).setValue(data);
@@ -153,6 +157,7 @@ public class Home extends AppCompatActivity {
                 holder.setTitle(model.getTitle());
                 holder.setNote(model.getNote());
                 holder.setDate(model.getDate());
+         //       holder.setstatus(model.getStatus());
                 holder.myView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -160,8 +165,19 @@ public class Home extends AppCompatActivity {
                         post_key=getRef(position).getKey();
                         title=model.getTitle();
                         note=model.getNote();
+                        date=model.getDate();
 
-                        UpdateData();
+                        if(model.getStatus()==0)
+                        {
+                            UpdateData();
+
+                        }
+                        else if(model.getStatus()==1)
+                        {
+                            showCompletedNote();
+                        }
+
+
                     }
                 });
 
@@ -183,6 +199,76 @@ public class Home extends AppCompatActivity {
 
     }
 
+    private void showCompletedNote() {
+
+        final AlertDialog.Builder dialog=new AlertDialog.Builder(Home.this);
+        LayoutInflater inflater=LayoutInflater.from(Home.this);
+
+        View view=inflater.inflate(R.layout.show,null);
+        dialog.setView(view);
+        final AlertDialog alertDialog=dialog.create();
+
+        titleup=view.findViewById(R.id.title_upd);
+        noteup=view.findViewById(R.id.note_upd);
+        btnDel=view.findViewById(R.id.btn_del);
+        btnUp=view.findViewById(R.id.btn_upd);
+        close=view.findViewById(R.id.btn_close);
+
+
+        titleup.setText(title.toString());
+        titleup.setSelection(title.length());
+        noteup.setText(note.toString());
+        noteup.setSelection(note.length());
+
+
+
+        btnUp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                title=titleup.getText().toString().trim();
+                note=noteup.getText().toString().trim();
+
+                int status=0;
+
+                String mDate=DateFormat.getDateInstance().format(new Date());
+
+                Data data=new Data(note,mDate, title, post_key,status);
+                database.child(post_key).setValue(data);
+
+                alertDialog.dismiss();
+            }
+        });
+        btnDel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                database.child(post_key).removeValue();
+
+
+                alertDialog.dismiss();
+            }
+        });
+        close.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+
+
+                //String mDate=DateFormat.getDateInstance().format(new Date());
+
+                alertDialog.dismiss();
+
+
+
+            }
+        });
+
+        alertDialog.show();
+
+
+
+    }
+
 
     public void UpdateData()
     {
@@ -198,12 +284,16 @@ public class Home extends AppCompatActivity {
         noteup=view.findViewById(R.id.note_update);
         btnDel=view.findViewById(R.id.btn_delete);
         btnUp=view.findViewById(R.id.btn_update);
+        complete=view.findViewById(R.id.btn_complete);
+
 
  // titleup.setText(title);
         titleup.setText(title.toString());
         titleup.setSelection(title.length());
         noteup.setText(note.toString());
         noteup.setSelection(note.length());
+
+
 
         btnUp.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -212,9 +302,11 @@ public class Home extends AppCompatActivity {
                 title=titleup.getText().toString().trim();
                 note=noteup.getText().toString().trim();
 
+                int status=0;
+
                 String mDate=DateFormat.getDateInstance().format(new Date());
 
-                Data data=new Data(note,mDate, title, post_key);
+                Data data=new Data(note,mDate, title, post_key,status);
                 database.child(post_key).setValue(data);
 
                 alertDialog.dismiss();
@@ -227,6 +319,22 @@ public class Home extends AppCompatActivity {
 
 
                 alertDialog.dismiss();
+            }
+        });
+        complete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                int status=1;
+
+                //String mDate=DateFormat.getDateInstance().format(new Date());
+
+                Data data=new Data(note,date, title, post_key,status);
+                database.child(post_key).setValue(data);
+                alertDialog.dismiss();
+
+
+
             }
         });
 
@@ -293,6 +401,18 @@ public class Home extends AppCompatActivity {
             TextView mDate=myView.findViewById(R.id.item_date);
             mDate.setText(Date);
         }
+//        public void setstatus(int status)
+//        {
+//            TextView stat=myView.findViewById(R.id.stat);
+//            stat.setText("status");
+//            stat.setBackgroundColor(0xc31d17);
+//            if (status==1)
+//            stat.setBackgroundColor(0xc31d17);
+//            else if (status==0)
+//                stat.setBackgroundColor(0xc31d17);
+//
+//
+//        }
     }
 }
 

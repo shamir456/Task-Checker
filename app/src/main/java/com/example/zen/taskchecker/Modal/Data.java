@@ -4,17 +4,27 @@ public class Data {
     private String note;
     private String date;
     private String title,id;
+    private int status;
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
 
     Data()
     {
 
     }
 
-    public Data(String note, String date, String title, String id) {
+    public Data(String note, String date, String title, String id,int status) {
         this.note = note;
         this.date = date;
         this.title = title;
         this.id = id;
+        this.status=status;
     }
 
     public String getNote() {
