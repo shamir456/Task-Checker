@@ -22,6 +22,10 @@
                   android:theme="@style/AppTheme.NoActionBar"
         >
         </activity>
+        <activity android:name=".SubTask"
+                  android:theme="@style/AppTheme.NoActionBar"
+        >
+        </activity>
 
     </application>
 

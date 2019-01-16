@@ -2,19 +2,20 @@ package com.example.zen.taskchecker;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.support.v7.view.menu.MenuView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.*;
-import android.widget.*;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
 import com.example.zen.taskchecker.Modal.Data;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
@@ -26,9 +27,9 @@ import com.google.firebase.database.Query;
 
 import java.text.DateFormat;
 import java.util.Date;
-import java.util.List;
 
-public class Home extends AppCompatActivity {
+public class SubTask extends AppCompatActivity {
+
 
     private Toolbar tool;
     private FloatingActionButton btn;
@@ -37,16 +38,15 @@ public class Home extends AppCompatActivity {
     //update fields
     private EditText titleup;
     private EditText noteup;
-    private  Button btnDel;
+    private Button btnDel;
     private Button btnUp;
 
     private Button complete;
     private Button close;
-    private Button subtask;
 
 
     //Firebase
-    private  FirebaseRecyclerAdapter adapter;
+    private FirebaseRecyclerAdapter adapter;
 
     //Variables
     private String title;
@@ -54,10 +54,11 @@ public class Home extends AppCompatActivity {
     private String note;
     private View view;
 
+    private String pId;
     private String date;
 
     private FirebaseAuth mAuth;
-    private DatabaseReference database=FirebaseDatabase.getInstance().getReference();
+    private DatabaseReference database= FirebaseDatabase.getInstance().getReference();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,7 +73,21 @@ public class Home extends AppCompatActivity {
         mAuth=FirebaseAuth.getInstance();
         FirebaseUser user=mAuth.getCurrentUser();
         String uid=mAuth.getUid();
-        database=FirebaseDatabase.getInstance().getReference().child("TaskNote").child(uid);
+        if(getIntent()!=null)
+        {
+            pId=getIntent().getStringExtra("Id");
+
+
+            System.out.println(pId);
+        }
+        if(!pId.isEmpty())
+        {
+            database=FirebaseDatabase.getInstance().getReference().child("TaskNote").child(uid).child("SubTasks");
+
+            System.out.println(database);
+
+        }
+
 
 
         // RecyclerView..
@@ -86,8 +101,8 @@ public class Home extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                AlertDialog.Builder myDialog=new AlertDialog.Builder(Home.this);
-                LayoutInflater layoutInflater=LayoutInflater.from(Home.this);
+                AlertDialog.Builder myDialog=new AlertDialog.Builder(SubTask.this);
+                LayoutInflater layoutInflater=LayoutInflater.from(SubTask.this);
                 View myview=layoutInflater.inflate(R.layout.inputfield,null);
                 myDialog.setView(myview);
                 final AlertDialog alertDialog=myDialog.create();
@@ -131,13 +146,11 @@ public class Home extends AppCompatActivity {
             }
         });
 
-
-
         queryList();
 
 
         //setSupportActionBar(tool);
-       // getSupportActionBar().setTitle("Task Checker");
+        // getSupportActionBar().setTitle("Task Checker");
     }
 
     void queryList()
@@ -145,22 +158,34 @@ public class Home extends AppCompatActivity {
         mAuth=FirebaseAuth.getInstance();
         FirebaseUser user=mAuth.getCurrentUser();
         String uid=mAuth.getUid();
+//        if(getIntent()!=null)
+//        {
+//            pId=getIntent().getStringExtra("ProductId");
+//
+//
+//            System.out.println(pId);
+//        }
+//        if(!pId.isEmpty())
+//        {
+//            database=FirebaseDatabase.getInstance().getReference().child("TaskNote").child(uid).child(pId);
+//
+//        }
 
 
 
         Query query = FirebaseDatabase.getInstance()
-                .getReference().child("TaskNote").child(uid).orderByChild("id");
+                .getReference().child("TaskNote").child(uid).child("SubTasks").orderByChild("id");
         final FirebaseRecyclerOptions<Data> options = new FirebaseRecyclerOptions.Builder<Data>().
                 setQuery(query,Data.class)
                 .build();
 
-        adapter= new FirebaseRecyclerAdapter<Data, ViewHolder>(options) {
+        adapter= new FirebaseRecyclerAdapter<Data, SubTask.ViewHolder>(options) {
             @Override
-            protected void onBindViewHolder(@NonNull ViewHolder holder, final int position, @NonNull final Data model) {
+            protected void onBindViewHolder(@NonNull SubTask.ViewHolder holder, final int position, @NonNull final Data model) {
                 holder.setTitle(model.getTitle());
                 holder.setNote(model.getNote());
                 holder.setDate(model.getDate());
-         //       holder.setstatus(model.getStatus());
+                //       holder.setstatus(model.getStatus());
                 holder.myView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -189,23 +214,23 @@ public class Home extends AppCompatActivity {
 
             @NonNull
             @Override
-            public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
-                 view = LayoutInflater.from(viewGroup.getContext())
+            public SubTask.ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
+                view = LayoutInflater.from(viewGroup.getContext())
                         .inflate(R.layout.item, viewGroup, false);
-                return new  ViewHolder(view);
+                return new SubTask.ViewHolder(view);
             }
         };
 
 
-          recyclerView.setAdapter(adapter);
+        recyclerView.setAdapter(adapter);
 
 
     }
 
     private void showCompletedNote() {
 
-        final AlertDialog.Builder dialog=new AlertDialog.Builder(Home.this);
-        LayoutInflater inflater=LayoutInflater.from(Home.this);
+        final AlertDialog.Builder dialog=new AlertDialog.Builder(SubTask.this);
+        LayoutInflater inflater=LayoutInflater.from(SubTask.this);
 
         View view=inflater.inflate(R.layout.show,null);
         dialog.setView(view);
@@ -218,12 +243,10 @@ public class Home extends AppCompatActivity {
         close=view.findViewById(R.id.btn_close);
 
 
-
         titleup.setText(title.toString());
         titleup.setSelection(title.length());
         noteup.setText(note.toString());
         noteup.setSelection(note.length());
-
 
 
 
@@ -277,8 +300,8 @@ public class Home extends AppCompatActivity {
 
     public void UpdateData()
     {
-        final AlertDialog.Builder dialog=new AlertDialog.Builder(Home.this);
-        LayoutInflater inflater=LayoutInflater.from(Home.this);
+        final AlertDialog.Builder dialog=new AlertDialog.Builder(SubTask.this);
+        LayoutInflater inflater=LayoutInflater.from(SubTask.this);
 
         View view=inflater.inflate(R.layout.update,null);
         dialog.setView(view);
@@ -290,27 +313,15 @@ public class Home extends AppCompatActivity {
         btnDel=view.findViewById(R.id.btn_delete);
         btnUp=view.findViewById(R.id.btn_update);
         complete=view.findViewById(R.id.btn_complete);
-        subtask=view.findViewById(R.id.btn_subtasks);
 
 
- // titleup.setText(title);
+        // titleup.setText(title);
         titleup.setText(title.toString());
         titleup.setSelection(title.length());
         noteup.setText(note.toString());
         noteup.setSelection(note.length());
 
 
-        subtask.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                alertDialog.dismiss();
-                Intent intent=new Intent(getApplicationContext(),SubTask.class);
-                intent.putExtra("Id",post_key);
-                startActivity(intent);
-
-            }
-        });
 
         btnUp.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -382,9 +393,9 @@ public class Home extends AppCompatActivity {
             case R.id.logout:
                 // Single menu item is selected do something
                 // Ex: launching new activity/screen or show alert message
-                Toast.makeText(Home.this, "Loging out..", Toast.LENGTH_SHORT).show();
+                Toast.makeText(SubTask.this, "Loging out..", Toast.LENGTH_SHORT).show();
                 mAuth.signOut();
-                startActivity(new Intent(Home.this,MainActivity.class));
+                startActivity(new Intent(SubTask.this,MainActivity.class));
                 return true;
 
             default:
@@ -432,5 +443,3 @@ public class Home extends AppCompatActivity {
 //        }
     }
 }
-
-
